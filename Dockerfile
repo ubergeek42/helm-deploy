@@ -8,5 +8,6 @@ RUN apk add --no-cache python git && \
     tar xzf helm*.tar.gz && \
     cp linux*/helm /usr/local/bin && \
     wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-215.0.0-linux-x86_64.tar.gz && \
-    tar xzf google-cloud-sdk*.tar.gz -C /usr/local
+    tar xzf google-cloud-sdk*.tar.gz -C /usr/local && \
+    rm -rf /tmp/install
 ENV PATH="/usr/local/google-cloud-sdk/bin:$PATH"

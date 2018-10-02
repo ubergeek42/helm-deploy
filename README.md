@@ -7,3 +7,4 @@ Installed commands:
 - `kubectl`
 - `gcloud`
 - `git`
+- `bash`

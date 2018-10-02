@@ -6,3 +6,4 @@ Installed commands:
 - `helm`
 - `kubectl`
 - `gcloud`
+- `git`

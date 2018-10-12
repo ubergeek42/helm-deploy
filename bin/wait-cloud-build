@@ -4,6 +4,13 @@
 
 set -euo pipefail
 
+usage() {
+    echo "$0 <gcp-project-name> <image-tag> [timeout-in-seconds]"
+    exit 1
+}
+
+[ "$#" -ge 2 ] || usage
+
 PROJECT="$1"
 TAG="$2"
 TIMEOUT_SECONDS="${3:-300}"

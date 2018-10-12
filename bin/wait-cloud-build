@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+#
+# This script waits for a Google Cloud Build to complete.
+
+set -euo pipefail
+
+PROJECT="$1"
+TAG="$2"
+TIMEOUT_SECONDS="${3:-300}"
+
+for _ in $(seq "$((TIMEOUT_SECONDS / 10))"); do
+    if build="$(gcloud builds list --project "$PROJECT" | grep "$TAG")"; then
+        if echo "$build" | grep -q "FAILURE"; then
+            echo 'Build failed'
+            exit 1
+        elif echo "$build" | grep -q "SUCCESS"; then
+            exit 0
+        fi
+    fi
+
+    echo 'Build in progress...'
+    sleep 10
+done
+
+echo 'Build timed out'
+exit 1

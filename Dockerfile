@@ -10,4 +10,8 @@ RUN apk add --no-cache bash git openssh python && \
     wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-215.0.0-linux-x86_64.tar.gz && \
     tar xzf google-cloud-sdk*.tar.gz -C /usr/local && \
     rm -rf /tmp/install
-ENV PATH="/usr/local/google-cloud-sdk/bin:$PATH"
+ENV PATH="/usr/local/google-cloud-sdk/bin:$PATH" GOOGLE_APPLICATION_CREDENTIALS=/tmp/credentials.json
+COPY entrypoint.sh /entrypoint.sh
+COPY bin/* /usr/local/bin/
+
+ENTRYPOINT ["/entrypoint.sh"]

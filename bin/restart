@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+#
+# This script initiates a rolling restart for each deployment in a helm
+# release. It's a bit of a hack because k8s doesn't have a built-in way to do a
+# rolling restarts (see https://github.com/kubernetes/kubernetes/issues/13488).
+
+set -euo pipefail
+
+usage() {
+    echo "$0 <helm-release-name>"
+    exit 1
+}
+
+[ "$#" -eq 1 ] || usage
+
+RELEASE="$1"
+
+if ! helm status "$RELEASE" >/dev/null; then
+    exit 1
+fi
+
+deploys() {
+    kubectl get deploy -l release="$RELEASE" -o json \
+        | jq -r '.items[] | .metadata.name'
+}
+
+for deploy in $(deploys); do
+    # We don't actually care which container gets updated, so we just grab the
+    # first one
+    container="$(kubectl get deploy "$deploy" -o json | jq '.spec.template.spec.containers[0].name')"
+    kubectl patch deploy "$deploy" \
+            -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":$container,\"env\":[{\"name\":\"RESTART_\",\"value\":\"$(date -uIseconds)\"}]}]}}}}"
+done

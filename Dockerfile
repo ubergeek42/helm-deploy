@@ -1,5 +1,5 @@
 FROM alpine:3.8
-RUN apk add --no-cache bash git openssh python && \
+RUN apk add --no-cache bash git jq openssh python && \
     mkdir -p /tmp/install && cd /tmp/install && \
     wget https://storage.googleapis.com/kubernetes-release/release/v1.10.6/bin/linux/amd64/kubectl && \
     mv kubectl /usr/local/bin && \

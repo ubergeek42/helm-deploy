@@ -8,6 +8,7 @@ Installed commands:
 - `gcloud`
 - `git`
 - `bash`
+- `jq`
 
 ## Logging Into Google Cloud
 To log into Google Cloud, set `GCLOUD_SERVICE_KEY` to be a base64-encoded

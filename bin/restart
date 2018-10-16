@@ -19,15 +19,17 @@ if ! helm status "$RELEASE" >/dev/null; then
     exit 1
 fi
 
+NAMESPACE="$(helm get values "$RELEASE" | awk '/environment/ { print $2; exit }')"
+
 deploys() {
-    kubectl get deploy -l release="$RELEASE" -o json \
+    kubectl get deploy -l release="$RELEASE" -n "$NAMESPACE" -o json \
         | jq -r '.items[] | .metadata.name'
 }
 
 for deploy in $(deploys); do
     # We don't actually care which container gets updated, so we just grab the
     # first one
-    container="$(kubectl get deploy "$deploy" -o json | jq '.spec.template.spec.containers[0].name')"
-    kubectl patch deploy "$deploy" \
+    container="$(kubectl get deploy "$deploy" -n "$NAMESPACE" -o json | jq '.spec.template.spec.containers[0].name')"
+    kubectl patch deploy "$deploy" -n "$NAMESPACE" \
             -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":$container,\"env\":[{\"name\":\"RESTART_\",\"value\":\"$(date -uIseconds)\"}]}]}}}}"
 done

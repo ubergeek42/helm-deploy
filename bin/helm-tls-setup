@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+HELM_HOME="${HELM_HOME:-$HOME/.helm}"
+
+mkdir -p "$HELM_HOME"
+
+if [ -v HELM_TLS_CERTFILE ]; then
+    echo "$HELM_TLS_CERTFILE" | base64 -d > "${HELM_TLS_CERT:-$HELM_HOME/cert.pem}"
+fi
+
+if [ -v HELM_TLS_CA_CERTFILE ]; then
+    echo "$HELM_TLS_CA_CERTFILE" | base64 -d > "${HELM_TLS_CA_CERT:-$HELM_HOME/ca.pem}"
+fi
+
+HELM_TLS_KEY="${HELM_TLS_KEY:-$HELM_HOME/key.pem}"
+
+if [ -v HELM_TLS_KEYFILE ] && \
+       [ -v HELM_TLS_KMS_PROJECT ] && \
+       [ -v HELM_TLS_KMS_KEYRING ] && \
+       [ -v HELM_TLS_KMS_KEY ]; then
+
+    echo "$HELM_TLS_KEYFILE" | base64 -d | \
+        gcloud kms decrypt \
+               --ciphertext-file=- \
+               --plaintext-file="$HELM_TLS_KEY" \
+               --location="${HELM_TLS_KMS_LOCATION:-global}" \
+               --project="$HELM_TLS_KMS_PROJECT" \
+               --keyring="$HELM_TLS_KMS_KEYRING" \
+               --key="$HELM_TLS_KMS_KEY"
+
+elif [ -v HELM_TLS_KEYFILE ]; then
+    echo "$HELM_TLS_KEYFILE" | base64 -d > "$HELM_TLS_KEY"
+fi
